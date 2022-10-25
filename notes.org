@@ -1,0 +1,294 @@
+* Notes
+I started this lab with this command:
+#+begin_src bash
+rails new dvd-shop --api --minimal
+#+end_src
+
+Notes On '--api' And '--minimal' Flags:
+- '--api': Adds additional API-specific configuration, and skips the code for generating .erb files with ActionView.
+- '--minimal': Skips a lot of additional Rails features that we won't use in our API, such as code for sending emails and processing images.
+
+I then went into the 'dvd-shop' folder, and nuked the '.git' directory to avoid a nested Git repo:
+#+begin_src bash
+samuelbanya@Samuels-MBP ~/hub/Development/code/phase-4/phase-4-creating-a-rails-api/dvd-shop $ rm -rf .git
+#+end_src
+
+The main goal is to be able to use a 'GET' request for the '/movies' route.
+
+What Is Needed For 'GET' Request For '/movies' Route:
+- route + controller for 'GET' request
+- 'Movie' 'model' to interact with the database
+- 'migration' to generate the corresponding database table for the 'Movie' model
+
+
+Related Table For Columns Required For 'Movie' Model:
+|-----------------+-----------|
+| Column Name     | Data Type |
+|-----------------+-----------|
+| title           | string    |
+| year            | integer   |
+| length          | integer   |
+| director        | string    |
+| description     | string    |
+| poster_url      | string    |
+| category        | string    |
+| discount        | boolean   |
+| female_director | boolean   |
+|-----------------+-----------|
+
+I then used the following 'rails g resource' command in the 'dvd-shop' directory:
+#+begin_src bash
+samuelbanya@Samuels-MBP ~/hub/Development/code/phase-4/phase-4-creating-a-rails-api/dvd-shop $ rails g resource Movie title year:integer length:integer director description poster_url category discount:boolean female_director:boolean --no-test-framework
+      invoke  active_record
+      create    db/migrate/20221025230726_create_movies.rb
+      create    app/models/movie.rb
+      invoke  controller
+      create    app/controllers/movies_controller.rb
+      invoke    erb
+      create      app/views/movies
+      invoke    helper
+      create      app/helpers/movies_helper.rb
+      invoke  resource_route
+       route    resources :movies
+#+end_src
+
+What The Previous 'rails g resource' Command Actually Did:
+- Generated a migration for creating the 'movies' table
+- Generated a 'Movies' model file
+- Generated a 'MoviesController' controller file
+- Added 'resources :movies' to the 'routes.rb' rile
+
+I then copied the contents of the 'seeds.rb' in the root of the project to the 'dvd-shop/db/seeds.rb' file.
+
+I then ran the following commands:
+#+begin_src bash
+rails db:migrate db:seed
+#+end_src
+
+Related output:
+#+begin_src bash
+samuelbanya@Samuels-MBP ~/hub/Development/code/phase-4/phase-4-creating-a-rails-api/dvd-shop $ rails g resource Movie title year:integer length:integer director description poster_url category discount:boolean female_director:boolean --no-test-framework
+      invoke  active_record
+      create    db/migrate/20221025230726_create_movies.rb
+      create    app/models/movie.rb
+      invoke  controller
+      create    app/controllers/movies_controller.rb
+      invoke    erb
+      create      app/views/movies
+      invoke    helper
+      create      app/helpers/movies_helper.rb
+      invoke  resource_route
+       route    resources :movies
+samuelbanya@Samuels-MBP ~/hub/Development/code/phase-4/phase-4-creating-a-rails-api/dvd-shop $ rails db:migrate db:seed
+== 20221025230726 CreateMovies: migrating =====================================
+-- create_table(:movies)
+   -> 0.0026s
+== 20221025230726 CreateMovies: migrated (0.0026s) ============================
+#+end_src
+
+I then added the following to the 'app/controllers/movies_controller.rb' Controller file:
+#+begin_src ruby
+class MoviesController < ApplicationController
+    def index
+        movies = Movie.all()
+        render json: movies
+    end
+end
+#+end_src
+
+I then ran the server with the 'rails s' server command, and visited the 'http://localhost:3000/movies' URL in a browser.
+
+This then generated the following JSON response:
+#+begin_src json
+// 20221025181431
+// http://localhost:3000/movies
+
+[
+  {
+    "id": 1,
+    "title": "The Color Purple",
+    "year": 1985,
+    "length": 154,
+    "director": "Steven Spielberg",
+    "description": "Whoopi Goldberg brings Alice Walker's Pulitzer Prize-winning feminist novel to life as Celie, a Southern woman who suffered abuse over decades. A project brought to a hesitant Steven Spielberg by producer Quincy Jones, the film marks Spielberg's first female lead.",
+    "poster_url": "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/3071/3071213_so.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": false,
+    "created_at": "2022-10-25T23:10:53.630Z",
+    "updated_at": "2022-10-25T23:10:53.630Z"
+  },
+  {
+    "id": 2,
+    "title": "Frida",
+    "year": 2002,
+    "length": 123,
+    "director": "Julie Taymor",
+    "description": "Her portrait, with that thick unibrow and un-waxed upper lip, has become an iconic symbol of feminism. Julie Taymor's biopic takes us behind the canvas to reveal the artist, the activist, the revolutionary. And knowing what we do now about lead actress Selma Hayek's off-screen experience, this film proves an even greater victory.",
+    "poster_url": "https://m.media-amazon.com/images/M/MV5BYzUxMTU0ZmEtZWE0Ni00NzJlLThhZTUtNDA1ZDZjZDUxYThiXkEyXkFqcGdeQXVyNjk1Njg5NTA@._V1_.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.635Z",
+    "updated_at": "2022-10-25T23:10:53.635Z"
+  },
+  {
+    "id": 3,
+    "title": "Queen of Katwe",
+    "year": 2016,
+    "length": 144,
+    "director": "Mira Nair",
+    "description": "Disney has a way of making us feel like pawns in a game of Let's See How Hard We Can Make Them Cry. But that's not the case with Mira Nair's feel-good drama about a Uganda girl's path to chess champ, adapted from an ESPN sports essay. Moms and dads, you want your daughters to grow up to be chess champions.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/12806084/p12806084_v_v8_ar.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.639Z",
+    "updated_at": "2022-10-25T23:10:53.639Z"
+  },
+  {
+    "id": 4,
+    "title": "Persepolis",
+    "year": 2007,
+    "length": 96,
+    "director": "Marjane Satrapi",
+    "description": "There's a lot at play here: Persepolis is animated like a graphic novel. It's done in black and white. It's about a girl who defies Islamic fundamentalists. It's autobiographical. And it's in French. The result: a brilliant feminist feat from Marjane Satrapi.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/173490/p173490_v_v8_an.jpg",
+    "category": "Animation",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.642Z",
+    "updated_at": "2022-10-25T23:10:53.642Z"
+  },
+  {
+    "id": 5,
+    "title": "Little Women",
+    "year": 1994,
+    "length": 118,
+    "director": "Gillian Armstrong",
+    "description": "Feminism isn't all \"women can do anything men can do\"—it's women can do whatever the hell they want to do. And for the protagonist sisters in Gillian Anderson's adaptation of Louisa May Alcott's novel, that means a writer, a musician, a housewife and a free spirit.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/16296/p16296_v_v8_aj.jpg",
+    "category": "Drama",
+    "discount": true,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.646Z",
+    "updated_at": "2022-10-25T23:10:53.646Z"
+  },
+  {
+    "id": 6,
+    "title": "Thelma and Louise",
+    "year": 1991,
+    "length": 130,
+    "director": "Ridley Scott",
+    "description": "Susan Sarandon and Gena Davis lock arms—and fates—in this buddy road trip drama with a feminist legacy that runs deeper than the Grand Canyon. Sure, it's directed by Ridley Scott, but the screenplay about a pair of outlaws who are anything but passive comes straight from the pen of Callie Khouri.",
+    "poster_url": "https://images-na.ssl-images-amazon.com/images/I/517NV58X7WL._SY445_.jpg",
+    "category": "Mystery",
+    "discount": false,
+    "female_director": false,
+    "created_at": "2022-10-25T23:10:53.650Z",
+    "updated_at": "2022-10-25T23:10:53.650Z"
+  },
+  {
+    "id": 7,
+    "title": "Alien",
+    "year": 1979,
+    "length": 117,
+    "director": "Ridley Scott",
+    "description": "Groundbreaking for 1979 science fiction, Sigourney Weaver's Ellen Ripley is one of the genre's most iconic female characters. She's not a damsel—she's a badass final girl and the only survivor to defeat the monster that mutilated and destroyed every other member of the Nostromo crew.",
+    "poster_url": "https://images-na.ssl-images-amazon.com/images/I/5119C4MWJ0L.jpg",
+    "category": "Fantasy",
+    "discount": true,
+    "female_director": false,
+    "created_at": "2022-10-25T23:10:53.654Z",
+    "updated_at": "2022-10-25T23:10:53.654Z"
+  },
+  {
+    "id": 8,
+    "title": "Little Women",
+    "year": 2019,
+    "length": 135,
+    "director": "Greta Gerwig",
+    "description": "In the years after the Civil War, Jo March lives in New York and makes her living as a writer, while her sister Amy studies painting in Paris. Amy has a chance encounter with Theodore, a childhood crush who proposed to Jo but was ultimately rejected. Their oldest sibling, Meg, is married to a schoolteacher, while shy sister Beth develops a devastating illness that brings the family back together.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/17008397/p17008397_v_v8_aa.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.658Z",
+    "updated_at": "2022-10-25T23:10:53.658Z"
+  },
+  {
+    "id": 9,
+    "title": "Mad Max: Fury Road",
+    "year": 2015,
+    "length": 140,
+    "director": "George Miller",
+    "description": "Unearthing feminism in a scorched, hell-on-wheels action flick from road warrior franchise man George Miller isn't exactly obvious. But though it's titled after a male character, he is muzzled for much of the film, lending the action to a female imperator and her feminist revolt against the horrors of sexism.",
+    "poster_url": "https://cdn.shopify.com/s/files/1/1416/8662/products/mad_max_fury_road_2015_advance_original_film_artB_69310cd2-a499-45fc-a12d-df89480c4c99_5000x.jpg?v=1573593327",
+    "category": "Fantasy",
+    "discount": false,
+    "female_director": false,
+    "created_at": "2022-10-25T23:10:53.662Z",
+    "updated_at": "2022-10-25T23:10:53.662Z"
+  },
+  {
+    "id": 10,
+    "title": "Mustang",
+    "year": 2015,
+    "length": 100,
+    "director": "Deniz Gamze Ergüven",
+    "description": "It's easy to call Deniz Gamze Ergüven's 2015 Oscar nominee a feminist film, since it's about five orphan girls who give oppression and the Turkish patriarchy the middle finger. But it's so much more than that—it's Ergüven's personal comment on what it means to be a woman in Turkey.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/11893143/p11893143_v_v8_ab.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.666Z",
+    "updated_at": "2022-10-25T23:10:53.666Z"
+  },
+  {
+    "id": 11,
+    "title": "Girlhood",
+    "year": 2015,
+    "length": 113,
+    "director": "Céline Sciamma",
+    "description": "Céline Sciamma's Girlhood, a contemporary narrative with a classic plot that isn't too distant from anything in the Jane Austen canon, follows a French teenager's slog through gang life on a quest to self-discovery.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/11240526/p11240526_v_v8_aa.jpg",
+    "category": "Drama",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.670Z",
+    "updated_at": "2022-10-25T23:10:53.670Z"
+  },
+  {
+    "id": 12,
+    "title": "Erin Brockovich",
+    "year": 2000,
+    "length": 113,
+    "director": "Steven Soderbergh",
+    "description": "Some will say Steven Soderbergh's true-life telling of that time a single mother blew the whistle on PG&E; knowingly poisoning local residents objectifies its lead with scanty costumes. We'd say that's precisely why this film makes our list: because women can wear whatever the hell they want and get sh*t done!",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/24917/p24917_v_v8_aa.jpg",
+    "category": "Drama",
+    "discount": true,
+    "female_director": false,
+    "created_at": "2022-10-25T23:10:53.674Z",
+    "updated_at": "2022-10-25T23:10:53.674Z"
+  },
+  {
+    "id": 13,
+    "title": "The Babadook",
+    "year": 2014,
+    "length": 95,
+    "director": "Jennifer Kent",
+    "description": "The portrayal of women in horror films has a ways to go. When it’s not a damsel in a soaked white tank top, it’s a virgin being tortured and exploited. Thankfully, that’s changing. In Jennifer Kent’s dark fairy tale, we have Amelia, a multidimensional character battling monsters and her own inner demons.",
+    "poster_url": "https://www.gstatic.com/tv/thumb/v22vodart/10644326/p10644326_v_v8_ah.jpg",
+    "category": "Horror",
+    "discount": false,
+    "female_director": true,
+    "created_at": "2022-10-25T23:10:53.678Z",
+    "updated_at": "2022-10-25T23:10:53.678Z"
+  }
+]
+#+end_src
+
+Answers For Check Your Understanding:
+- Q1. What files are generated when running rails g resource ResourceName?
+- Answer: A migration for the resource's database table (ex: "movies" migration), a related 'model' file (ex: "Movie" model file), an associated controller (ex: "MoviesController" controller file), and the addition of the 'resources :<resource name(s)>' to the 'config/routes.rb' routes file (ex in 'config/routes.rb' routes file: "resources :movies")
